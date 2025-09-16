@@ -125,8 +125,39 @@ study(
     info = XLS_FP_MULTIPLIER_INFO,
     module = "XLSFloatingPointMultiplier",
     scala_files = glob(["src/main/scala/**/*.scala"]),
-    verilog_files = glob(["src/main/resources/*.v"]),
+    verilog_files = ["fp64mul_{latency}.v".format(latency = latency) for latency in LATENCIES],
 )
+
+genrule(
+    name = "fp64mul_ir",
+    srcs = ["fp64mul.x"],
+    outs = ["fp64mul.ir"],
+    cmd = """
+IR_CONVERTER=$(location @xls//:ir_converter)
+RUNFILES_DIR=$${IR_CONVERTER}.runfiles/+_repo_rules+xls
+$${IR_CONVERTER} $(location fp64mul.x) --top=fp64mul --dslx_stdlib_path=$${RUNFILES_DIR}/xls/dslx/stdlib > $@
+""",
+    tools = ["@xls//:ir_converter"],
+)
+
+genrule(
+    name = "fp64mul_opt_ir",
+    srcs = ["fp64mul.ir"],
+    outs = ["fp64mul.opt.ir"],
+    cmd = "$(location @xls//:opt_main) $(location fp64mul.ir) > $@",
+    tools = ["@xls//:opt_main"],
+)
+
+[genrule(
+    name = "fp64mul_{latency}_v".format(latency = latency),
+    srcs = ["fp64mul.opt.ir"],
+    outs = ["fp64mul_{latency}.v".format(latency = latency)],
+    cmd = "$(location @xls//:codegen_main) $(location fp64mul.opt.ir) {flag} --delay_model=asap7 --module_name=XLSFloatingPointMultiplier_{latency}_core > $@".format(
+        flag = "--generator=combinational" if latency == 0 else "--pipeline_stages={latency}".format(latency = latency),
+        latency = latency,
+    ),
+    tools = ["@xls//:codegen_main"],
+) for latency in LATENCIES]
 
 filegroup(
     name = "chiselfiles",

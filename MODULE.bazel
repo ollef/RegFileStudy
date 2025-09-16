@@ -131,3 +131,20 @@ http_archive(
     strip_prefix = "berkeley-hardfloat-109ac38f253184dbb67223cac0c3ae5408d82d7a",
     url = "https://github.com/Pinata-Consulting/berkeley-hardfloat/archive/109ac38f253184dbb67223cac0c3ae5408d82d7a.zip",
 )
+
+http_archive(
+    name = "xls",
+    build_file_content = """
+exports_files(glob(["*"]), visibility = ["//visibility:public"])
+
+sh_binary(
+    name = "ir_converter",
+    srcs = ["ir_converter_main"],
+    data = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+""",
+    sha256 = "96962d3cc6673a35ee71d511bfc6306af1b7097231f3302c0113115d3c184081",
+    strip_prefix = "xls-v0.0.0-8685-g7540f6e14-linux-x64",
+    url = "https://github.com/google/xls/releases/download/v0.0.0-8685-g7540f6e14/xls-v0.0.0-8685-g7540f6e14-linux-x64.tar.gz",
+)
