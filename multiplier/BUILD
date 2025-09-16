@@ -113,7 +113,6 @@ XLS_FP_MULTIPLIER_INFO = {
             "retime": retime,
         }
         for i in LATENCIES
-        if i != 0  # XLS does not seem to want to generate unpipelined designs
         for retime in [
             1,
             0,

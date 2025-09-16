@@ -1,0 +1,127 @@
+module XLSFloatingPointMultiplier_0_core(
+  input wire clk,
+  input wire [64:0] a,
+  input wire [64:0] b,
+  output wire [64:0] out
+);
+  // lint_off MULTIPLY
+  function automatic [107:0] umul108b_54b_x_54b (input reg [53:0] lhs, input reg [53:0] rhs);
+    begin
+      umul108b_54b_x_54b = lhs * rhs;
+    end
+  endfunction
+  // lint_on MULTIPLY
+  wire [10:0] a_bexp__2;
+  wire [10:0] literal_593;
+  wire [10:0] b_bexp__1;
+  wire literal_595;
+  wire [52:0] a_fraction;
+  wire [52:0] b_fraction;
+  wire eq_598;
+  wire eq_599;
+  wire literal_600;
+  wire [53:0] a_fraction__2;
+  wire [53:0] b_fraction__2;
+  wire nor_603;
+  wire [107:0] umul_606;
+  wire [11:0] add_608;
+  wire [107:0] fraction;
+  wire [106:0] literal_613;
+  wire [12:0] exp;
+  wire [107:0] fraction__1;
+  wire [107:0] sticky;
+  wire [12:0] exp__1;
+  wire [107:0] fraction__2;
+  wire [12:0] exp__2;
+  wire [12:0] literal_624;
+  wire [107:0] fraction__3;
+  wire [107:0] sticky__1;
+  wire [107:0] fraction__4;
+  wire ne_636;
+  wire greater_than_half_way;
+  wire [52:0] fraction__5;
+  wire [52:0] literal_642;
+  wire do_round_up;
+  wire [53:0] fraction__6;
+  wire [53:0] fraction__7;
+  wire [12:0] add_649;
+  wire [12:0] exp__3;
+  wire is_subnormal;
+  wire [10:0] high_exp;
+  wire [11:0] result_exp;
+  wire eq_656;
+  wire eq_657;
+  wire eq_658;
+  wire eq_659;
+  wire [11:0] result_exp__1;
+  wire has_inf_arg;
+  wire and_reduce_666;
+  wire has_0_arg;
+  wire is_result_nan;
+  wire a_sign;
+  wire b_sign;
+  wire [52:0] result_fraction;
+  wire result_sign;
+  wire [52:0] result_fraction__3;
+  wire [52:0] nan_fraction;
+  wire result_sign__1;
+  wire [10:0] result_exp__4;
+  wire [52:0] result_fraction__4;
+  assign a_bexp__2 = a[63:53];
+  assign literal_593 = 11'h000;
+  assign b_bexp__1 = b[63:53];
+  assign literal_595 = 1'h1;
+  assign a_fraction = a[52:0];
+  assign b_fraction = b[52:0];
+  assign eq_598 = a_bexp__2 == literal_593;
+  assign eq_599 = b_bexp__1 == literal_593;
+  assign literal_600 = 1'h0;
+  assign a_fraction__2 = {literal_595, a_fraction};
+  assign b_fraction__2 = {literal_595, b_fraction};
+  assign nor_603 = ~(eq_598 | eq_599);
+  assign umul_606 = umul108b_54b_x_54b(a_fraction__2, b_fraction__2);
+  assign add_608 = {literal_600, a_bexp__2} + {literal_600, b_bexp__1};
+  assign fraction = umul_606 & {108{nor_603}};
+  assign literal_613 = 107'h000_0000_0000_0000_0000_0000_0000;
+  assign exp = {literal_600, add_608} + 13'h1c01;
+  assign fraction__1 = fraction >> fraction[107];
+  assign sticky = {literal_613, fraction[0]};
+  assign exp__1 = exp & {13{nor_603}};
+  assign fraction__2 = fraction__1 | sticky;
+  assign exp__2 = exp__1 + {12'h000, fraction[107]};
+  assign literal_624 = 13'h0000;
+  assign fraction__3 = $signed(exp__2) <= $signed(literal_624) ? {literal_600, fraction__2[107:1]} : fraction__2;
+  assign sticky__1 = {literal_613, fraction__2[0]};
+  assign fraction__4 = fraction__3 | sticky__1;
+  assign ne_636 = fraction__4[51:0] != 52'h0_0000_0000_0000;
+  assign greater_than_half_way = fraction__4[52] & ne_636;
+  assign fraction__5 = fraction__4[105:53];
+  assign literal_642 = 53'h00_0000_0000_0000;
+  assign do_round_up = greater_than_half_way | ~(~fraction__4[52] | ne_636 | ~fraction__4[53]);
+  assign fraction__6 = {literal_600, fraction__5};
+  assign fraction__7 = fraction__6 + {literal_642, do_round_up};
+  assign add_649 = exp__2 + 13'h0001;
+  assign exp__3 = fraction__7[53] ? add_649 : exp__2;
+  assign is_subnormal = $signed(exp__3) <= $signed(literal_624);
+  assign high_exp = 11'h7ff;
+  assign result_exp = exp__3[11:0];
+  assign eq_656 = a_bexp__2 == high_exp;
+  assign eq_657 = a_fraction == literal_642;
+  assign eq_658 = b_bexp__1 == high_exp;
+  assign eq_659 = b_fraction == literal_642;
+  assign result_exp__1 = result_exp & {12{~is_subnormal}};
+  assign has_inf_arg = eq_656 & eq_657 | eq_658 & eq_659;
+  assign and_reduce_666 = &result_exp__1[10:0];
+  assign has_0_arg = eq_598 | eq_599;
+  assign is_result_nan = ~(~eq_656 | eq_657) | ~(~eq_658 | eq_659) | has_0_arg & has_inf_arg;
+  assign a_sign = a[64:64];
+  assign b_sign = b[64:64];
+  assign result_fraction = fraction__7[52:0];
+  assign result_sign = a_sign ^ b_sign;
+  assign result_fraction__3 = result_fraction & {53{~(has_inf_arg | result_exp__1[11] | and_reduce_666 | is_subnormal)}};
+  assign nan_fraction = 53'h10_0000_0000_0000;
+  assign result_sign__1 = ~is_result_nan & result_sign;
+  assign result_exp__4 = is_result_nan | has_inf_arg | result_exp__1[11] | and_reduce_666 ? high_exp : result_exp__1[10:0];
+  assign result_fraction__4 = is_result_nan ? nan_fraction : result_fraction__3;
+  assign out = {result_sign__1, result_exp__4, result_fraction__4};
+endmodule
