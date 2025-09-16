@@ -7,7 +7,7 @@ load("@bazel-orfs//:openroad.bzl", "orfs_flow", "orfs_run")
 load("@bazel-orfs//:write_binary.bzl", "write_binary")
 load("@bazel-orfs//toolchains/scala:chisel.bzl", "chisel_binary")
 
-def study(name, info, scala_files, module):
+def study(name, info, scala_files, module, verilog_files = []):
     """
     Create a study for the given parameters.
 
@@ -96,7 +96,7 @@ def study(name, info, scala_files, module):
             },
             top = study["top"],
             variant = "retimed" if study["retime"] == 1 else "base",
-            verilog_files = [":{name}.sv".format(name = name)],
+            verilog_files = [":{name}.sv".format(name = name)] + verilog_files,
         )
 
         orfs_run(

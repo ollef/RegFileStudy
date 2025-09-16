@@ -28,7 +28,7 @@ case class MultiplierConfig(
     val retime: Int
 )
 
-class Top[T <: Module { val io: Bundle }](
+class Top[T <: BaseModule { val io: Bundle }](
     configs: Seq[MultiplierConfig],
     gen: MultiplierConfig => T
 ) extends Module {
@@ -71,7 +71,9 @@ object GenerateStudy extends App {
     new Top(
       configs,
       config =>
-        constructor.newInstance(config).asInstanceOf[Module { val io: Bundle }]
+        constructor
+          .newInstance(config)
+          .asInstanceOf[BaseModule { val io: Bundle }]
     ),
     chiselArgs,
     firtoolArgs

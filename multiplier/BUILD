@@ -96,6 +96,38 @@ study(
     scala_files = glob(["src/main/scala/**/*.scala"]),
 )
 
+XLS_FP_MULTIPLIER_INFO = {
+    "name": "XLS floating point multiplier",
+    "stage": "synth",
+    "study": [
+        {
+            "name": "XLSFloatingPointMultiplier_{i}_{retime}".format(
+                i = i,
+                retime = retime,
+            ),
+            "top": "XLSFloatingPointMultiplier_{i}".format(
+                i = i,
+            ),
+            "width": 64,
+            "latency": i,
+            "retime": retime,
+        }
+        for i in LATENCIES
+        for retime in [
+            1,
+            0,
+        ]
+    ],
+}
+
+study(
+    name = "xls_fp_mul",
+    info = XLS_FP_MULTIPLIER_INFO,
+    module = "XLSFloatingPointMultiplier",
+    scala_files = glob(["src/main/scala/**/*.scala"]),
+    verilog_files = glob(["src/main/resources/*.v"])
+)
+
 filegroup(
     name = "chiselfiles",
     srcs = glob(["**/*.scala"]),
