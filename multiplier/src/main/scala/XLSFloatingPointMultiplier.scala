@@ -11,6 +11,7 @@ class XLSFloatingPointMultiplier(config: MultiplierConfig) extends Module {
   })
 
   val core = Module(new XLSFloatingPointMultiplierCore(config))
+  core.io.clk := clock
   core.io.a := RegNext(io.a)
   core.io.b := RegNext(io.b)
   io.out := RegNext(core.io.out)
@@ -20,6 +21,7 @@ class XLSFloatingPointMultiplierCore(config: MultiplierConfig)
     extends BlackBox {
   override def desiredName = config.top + "_core"
   val io = IO(new Bundle {
+    val clk = Input(Clock())
     val a = Input(UInt(config.width.W))
     val b = Input(UInt(config.width.W))
     val out = Output(UInt(config.width.W))
